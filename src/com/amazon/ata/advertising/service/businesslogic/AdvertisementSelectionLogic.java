@@ -4,14 +4,19 @@ import com.amazon.ata.advertising.service.dao.ReadableDao;
 import com.amazon.ata.advertising.service.model.AdvertisementContent;
 import com.amazon.ata.advertising.service.model.EmptyGeneratedAdvertisement;
 import com.amazon.ata.advertising.service.model.GeneratedAdvertisement;
+import com.amazon.ata.advertising.service.model.RequestContext;
+import com.amazon.ata.advertising.service.targeting.TargetingEvaluator;
 import com.amazon.ata.advertising.service.targeting.TargetingGroup;
 
+import com.amazon.ata.advertising.service.targeting.predicate.TargetingPredicate;
+import com.amazon.ata.advertising.service.targeting.predicate.TargetingPredicateResult;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.*;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 /**
@@ -63,9 +68,35 @@ public class AdvertisementSelectionLogic {
             final List<AdvertisementContent> contents = contentDao.get(marketplaceId);
 
             if (CollectionUtils.isNotEmpty(contents)) {
-                AdvertisementContent randomAdvertisementContent = contents.get(random.nextInt(contents.size()));
+                List<AdvertisementContent> advertisementContents = contents.stream()
+                        .filter(advertisementContent -> targetingGroupDao.get(advertisementContent.getContentId()).stream()
+                                .anyMatch(targetingGroup -> {
+                                    TargetingEvaluator targetingEvaluator = new TargetingEvaluator(new RequestContext(customerId, marketplaceId));
+                                    TargetingPredicateResult result = targetingEvaluator.evaluate(targetingGroup);
+                                    return result.isTrue();
+                                }))
+                        .collect(Collectors.toList());
+
+                AdvertisementContent randomAdvertisementContent = advertisementContents.get(random.nextInt(advertisementContents.size()));
                 generatedAdvertisement = new GeneratedAdvertisement(randomAdvertisementContent);
+
+
+//                        .map(advertisementContent -> targetingGroupDao.get(advertisementContent.getContentId()))
+//                        .flatMap(Collection::stream)
+//                        .map(targetingGroup -> {
+//                            TargetingEvaluator targetingEvaluator = new TargetingEvaluator(new RequestContext(customerId, marketplaceId));
+//                            TargetingPredicateResult result = targetingEvaluator.evaluate(targetingGroup);
+//                            return result;
+//                        })
+//                        .filter(TargetingPredicateResult -> TargetingPredicateResult.isTrue())
+//                        .map()
             }
+
+//            if (CollectionUtils.isNotEmpty(contents)) {
+//                AdvertisementContent randomAdvertisementContent = contents.get(random.nextInt(contents.size()));
+//                generatedAdvertisement = new GeneratedAdvertisement(randomAdvertisementContent);
+//            }
+//
 
         }
 

@@ -4,11 +4,7 @@ import com.amazon.ata.advertising.service.targeting.predicate.TargetingPredicate
 
 import com.amazon.ata.advertising.service.targeting.predicate.TargetingPredicateTypeConverter;
 
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBAttribute;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBHashKey;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBIndexHashKey;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTypeConverted;
+import com.amazonaws.services.dynamodbv2.datamodeling.*;
 
 import java.util.List;
 
@@ -59,28 +55,28 @@ public class TargetingGroup {
         return targetingGroupId;
     }
 
-    public void setTargetingGroupId(String id) {
-        this.targetingGroupId = id;
+    public void setTargetingGroupId(String targetingGroupId) {
+        this.targetingGroupId = targetingGroupId;
     }
 
     public String getContentId() {
         return contentId;
     }
 
-    public double getClickThroughRate() {
-        return clickThroughRate;
-    }
-
-    public List<TargetingPredicate> getTargetingPredicates() {
-        return targetingPredicates;
-    }
-
     public void setContentId(String contentId) {
         this.contentId = contentId;
     }
 
+    public double getClickThroughRate() {
+        return clickThroughRate;
+    }
+
     public void setClickThroughRate(double clickThroughRate) {
         this.clickThroughRate = clickThroughRate;
+    }
+
+    public List<TargetingPredicate> getTargetingPredicates() {
+        return targetingPredicates;
     }
 
     public void setTargetingPredicates(List<TargetingPredicate> targetingPredicates) {
