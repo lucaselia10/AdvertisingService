@@ -11,6 +11,7 @@ import org.mockito.Mock;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
@@ -40,13 +41,13 @@ public class TargetingEvaluatorTest {
     }
 
     @Test
-    public void evaluateNoPredicates() {
+    public void evaluateNoPredicates() throws ExecutionException, InterruptedException {
         TargetingPredicateResult result = targetingEvaluator.evaluate(targetingGroup);
         assertEquals(TargetingPredicateResult.TRUE, result);
     }
 
     @Test
-    public void evaluateTruePredicate() {
+    public void evaluateTruePredicate() throws ExecutionException, InterruptedException {
         when(predicate1.evaluate(requestContext)).thenReturn(TargetingPredicateResult.TRUE);
         targetingPredicates.add(predicate1);
 
@@ -55,7 +56,7 @@ public class TargetingEvaluatorTest {
     }
 
     @Test
-    public void evaluateFalsePredicate() {
+    public void evaluateFalsePredicate() throws ExecutionException, InterruptedException {
         when(predicate1.evaluate(requestContext)).thenReturn(TargetingPredicateResult.FALSE);
         targetingPredicates.add(predicate1);
 
@@ -64,7 +65,7 @@ public class TargetingEvaluatorTest {
     }
 
     @Test
-    public void evaluateIndeterminatePredicate() {
+    public void evaluateIndeterminatePredicate() throws ExecutionException, InterruptedException {
         when(predicate1.evaluate(requestContext)).thenReturn(TargetingPredicateResult.INDETERMINATE);
         targetingPredicates.add(predicate1);
 
@@ -73,7 +74,7 @@ public class TargetingEvaluatorTest {
     }
 
     @Test
-    public void evaluateTrueAndFalsePredicate() {
+    public void evaluateTrueAndFalsePredicate() throws ExecutionException, InterruptedException {
         when(predicate1.evaluate(requestContext)).thenReturn(TargetingPredicateResult.TRUE);
         when(predicate2.evaluate(requestContext)).thenReturn(TargetingPredicateResult.FALSE);
         targetingPredicates.add(predicate1);
@@ -84,7 +85,7 @@ public class TargetingEvaluatorTest {
     }
 
     @Test
-    public void evaluateTrueAndIndeterminatePredicate() {
+    public void evaluateTrueAndIndeterminatePredicate() throws ExecutionException, InterruptedException {
         when(predicate1.evaluate(requestContext)).thenReturn(TargetingPredicateResult.TRUE);
         when(predicate2.evaluate(requestContext)).thenReturn(TargetingPredicateResult.INDETERMINATE);
         targetingPredicates.add(predicate1);
@@ -95,7 +96,7 @@ public class TargetingEvaluatorTest {
     }
 
     @Test
-    public void evaluateFalseAndIndeterminatePredicate() {
+    public void evaluateFalseAndIndeterminatePredicate() throws ExecutionException, InterruptedException {
         when(predicate1.evaluate(requestContext)).thenReturn(TargetingPredicateResult.INDETERMINATE);
         when(predicate2.evaluate(requestContext)).thenReturn(TargetingPredicateResult.FALSE);
         targetingPredicates.add(predicate1);
@@ -106,7 +107,7 @@ public class TargetingEvaluatorTest {
     }
 
     @Test
-    public void evaluateMultipleTruePredicates() {
+    public void evaluateMultipleTruePredicates() throws ExecutionException, InterruptedException {
         when(predicate1.evaluate(requestContext)).thenReturn(TargetingPredicateResult.TRUE);
         when(predicate2.evaluate(requestContext)).thenReturn(TargetingPredicateResult.TRUE);
         targetingPredicates.add(predicate1);

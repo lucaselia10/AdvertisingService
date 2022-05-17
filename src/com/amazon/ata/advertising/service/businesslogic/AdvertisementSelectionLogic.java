@@ -16,6 +16,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 
@@ -72,7 +73,14 @@ public class AdvertisementSelectionLogic {
                         .filter(advertisementContent -> targetingGroupDao.get(advertisementContent.getContentId()).stream()
                                 .anyMatch(targetingGroup -> {
                                     TargetingEvaluator targetingEvaluator = new TargetingEvaluator(new RequestContext(customerId, marketplaceId));
-                                    TargetingPredicateResult result = targetingEvaluator.evaluate(targetingGroup);
+                                    TargetingPredicateResult result = null;
+                                    try {
+                                        result = targetingEvaluator.evaluate(targetingGroup);
+                                    } catch (ExecutionException e) {
+                                        e.printStackTrace();
+                                    } catch (InterruptedException e) {
+                                        e.printStackTrace();
+                                    }
                                     return result.isTrue();
                                 }))
                         .collect(Collectors.toList());
@@ -81,22 +89,11 @@ public class AdvertisementSelectionLogic {
                 generatedAdvertisement = new GeneratedAdvertisement(randomAdvertisementContent);
 
 
-//                        .map(advertisementContent -> targetingGroupDao.get(advertisementContent.getContentId()))
-//                        .flatMap(Collection::stream)
-//                        .map(targetingGroup -> {
-//                            TargetingEvaluator targetingEvaluator = new TargetingEvaluator(new RequestContext(customerId, marketplaceId));
-//                            TargetingPredicateResult result = targetingEvaluator.evaluate(targetingGroup);
-//                            return result;
-//                        })
-//                        .filter(TargetingPredicateResult -> TargetingPredicateResult.isTrue())
-//                        .map()
+
             }
 
-//            if (CollectionUtils.isNotEmpty(contents)) {
-//                AdvertisementContent randomAdvertisementContent = contents.get(random.nextInt(contents.size()));
-//                generatedAdvertisement = new GeneratedAdvertisement(randomAdvertisementContent);
-//            }
-//
+
+
 
         }
 

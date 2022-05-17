@@ -1,25 +1,25 @@
 package com.amazon.ata.advertising.service.targeting.predicate;
 
+
 /**
  * Possible outcomes from a targeting predicate's evaluate method. If a TRUE/FALSE value cannot be evaluated,
  * INDETERMINATE will be returned.
  */
+
 public enum TargetingPredicateResult {
     TRUE(true), FALSE(false), INDETERMINATE(false);
 
-    private boolean isTrueResult;
+    private Boolean isTrueResult;
 
     /**
      * Each targeting predicate result value defines if it could be considered true.
      * @param isTrueResult Should this result be considered a true result.
      */
-    TargetingPredicateResult(boolean isTrueResult) {
+    TargetingPredicateResult(Boolean isTrueResult) {
         this.isTrueResult = isTrueResult;
     }
 
-    public boolean isTrue() {
-        return isTrueResult;
-    }
+    public Boolean isTrue() {return isTrueResult; }
 
     /**
      * Calculate the inverse of the passed result.
