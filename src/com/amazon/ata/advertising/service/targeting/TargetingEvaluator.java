@@ -38,8 +38,5 @@ public class TargetingEvaluator {
         service.shutdown();
 
         return allTruePredicates.get() ? TargetingPredicateResult.TRUE : TargetingPredicateResult.FALSE;
-
-//        return allTruePredicates ? TargetingPredicateResult.TRUE :
-//                TargetingPredicateResult.FALSE;
     }
 }

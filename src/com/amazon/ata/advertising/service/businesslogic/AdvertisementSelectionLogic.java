@@ -87,16 +87,8 @@ public class AdvertisementSelectionLogic {
 
                 AdvertisementContent randomAdvertisementContent = advertisementContents.get(random.nextInt(advertisementContents.size()));
                 generatedAdvertisement = new GeneratedAdvertisement(randomAdvertisementContent);
-
-
-
             }
-
-
-
-
         }
-
         return generatedAdvertisement;
     }
 }
