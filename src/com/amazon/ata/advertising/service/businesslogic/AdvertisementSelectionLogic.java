@@ -1,13 +1,11 @@
 package com.amazon.ata.advertising.service.businesslogic;
 
 import com.amazon.ata.advertising.service.dao.ReadableDao;
-import com.amazon.ata.advertising.service.model.AdvertisementContent;
-import com.amazon.ata.advertising.service.model.EmptyGeneratedAdvertisement;
-import com.amazon.ata.advertising.service.model.GeneratedAdvertisement;
-import com.amazon.ata.advertising.service.model.RequestContext;
+import com.amazon.ata.advertising.service.model.*;
 import com.amazon.ata.advertising.service.targeting.TargetingEvaluator;
 import com.amazon.ata.advertising.service.targeting.TargetingGroup;
 
+import com.amazon.ata.advertising.service.targeting.TargetingGroupComparator;
 import com.amazon.ata.advertising.service.targeting.predicate.TargetingPredicate;
 import com.amazon.ata.advertising.service.targeting.predicate.TargetingPredicateResult;
 import org.apache.commons.collections4.CollectionUtils;
@@ -18,6 +16,7 @@ import org.apache.logging.log4j.Logger;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.inject.Inject;
 
 /**
@@ -66,10 +65,52 @@ public class AdvertisementSelectionLogic {
         if (StringUtils.isEmpty(marketplaceId)) {
             LOG.warn("MarketplaceId cannot be null or empty. Returning empty ad.");
         } else {
+            // Gets list of AdvertisementContent for the marketplaceId
             final List<AdvertisementContent> contents = contentDao.get(marketplaceId);
 
+//            TreeMap<TargetingGroup, String> adMap = new TreeMap<TargetingGroup, String>(new TargetingGroupComparator());
+//            for (AdvertisementContent ad : contents) {
+//                // Gets list of TargetingGroup associated with the AdvertisementContent's contentId
+//                List<TargetingGroup> targetingGroups = targetingGroupDao.get(ad.getContentId());
+//                for (TargetingGroup group : targetingGroups) {
+//                    // Puts the TargetingGroup's into the Sorted TreeMap by their clickthrough rate
+//                    adMap.put(group, group.getContentId());
+//                }
+//            }
+//
+//            for (Map.Entry<TargetingGroup, String> entry : adMap.entrySet()) {
+//                TargetingEvaluator targetingEvaluator = new TargetingEvaluator(new RequestContext(customerId, marketplaceId));
+//                TargetingPredicateResult result = null;
+//                try {
+//                   result = targetingEvaluator.evaluate(entry.getKey());
+//                } catch (ExecutionException e) {
+//                    e.printStackTrace();
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
+//                if (result.isTrue()) {
+//
+//            }
+
+
+
+//                    .anyMatch(targetingGroup -> {
+//                                TargetingEvaluator targetingEvaluator = new TargetingEvaluator(new RequestContext(customerId, marketplaceId));
+//                                TargetingPredicateResult result = null;
+//                                try {
+//                                    result = targetingEvaluator.evaluate(targetingGroup);
+//                                } catch (ExecutionException e) {
+//                                    e.printStackTrace();
+//                                } catch (InterruptedException e) {
+//                                    e.printStackTrace();
+//                                }
+//                                return result.isTrue();
+//                            })
+//                    .collect(Collectors.toList());
+
+
             if (CollectionUtils.isNotEmpty(contents)) {
-                List<AdvertisementContent> advertisementContents = contents.stream()
+                LisAdvertisementContent> advertisementContents = contents.stream()
                         .filter(advertisementContent -> targetingGroupDao.get(advertisementContent.getContentId()).stream()
                                 .anyMatch(targetingGroup -> {
                                     TargetingEvaluator targetingEvaluator = new TargetingEvaluator(new RequestContext(customerId, marketplaceId));
@@ -85,10 +126,10 @@ public class AdvertisementSelectionLogic {
                                 }))
                         .collect(Collectors.toList());
 
-                AdvertisementContent randomAdvertisementContent = advertisementContents.get(random.nextInt(advertisementContents.size()));
+                AdvertisementContent randomAdvertisementContent = .get(0);
                 generatedAdvertisement = new GeneratedAdvertisement(randomAdvertisementContent);
             }
-        }
+
         return generatedAdvertisement;
     }
 }
