@@ -1,23 +1,24 @@
 package com.amazon.ata.advertising.service.businesslogic;
 
 import com.amazon.ata.advertising.service.dao.ReadableDao;
-import com.amazon.ata.advertising.service.model.*;
+import com.amazon.ata.advertising.service.model.AdvertisementContent;
+import com.amazon.ata.advertising.service.model.EmptyGeneratedAdvertisement;
+import com.amazon.ata.advertising.service.model.GeneratedAdvertisement;
+import com.amazon.ata.advertising.service.model.RequestContext;
 import com.amazon.ata.advertising.service.targeting.TargetingEvaluator;
 import com.amazon.ata.advertising.service.targeting.TargetingGroup;
-
-import com.amazon.ata.advertising.service.targeting.TargetingGroupComparator;
-import com.amazon.ata.advertising.service.targeting.predicate.TargetingPredicate;
 import com.amazon.ata.advertising.service.targeting.predicate.TargetingPredicateResult;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.*;
+import javax.inject.Inject;
+import java.util.List;
+import java.util.Random;
+import java.util.TreeMap;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import javax.inject.Inject;
 
 /**
  * This class is responsible for picking the advertisement to be rendered.
@@ -70,44 +71,8 @@ public class AdvertisementSelectionLogic {
             // Gets list of AdvertisementContent for the marketplaceId
             final List<AdvertisementContent> contents = contentDao.get(marketplaceId);
 
-//            Map<String, AdvertisementContent> advertisementContentMap = new HashMap<>();
-//            for (AdvertisementContent ad : contents) {
-//                advertisementContentMap.put(ad.getContentId(), ad);
-//            }
-//
-//            List<TargetingGroup> targetingGroups = new ArrayList<>();
-//            if (CollectionUtils.isNotEmpty(contents)) {
-//                for (AdvertisementContent content : contents) {
-//                    targetingGroups.addAll(targetingGroupDao.get(content.getContentId()));
-//                }
-//            }
-//
-//            TreeMap<TargetingGroup, AdvertisementContent> adMap = new TreeMap<TargetingGroup, AdvertisementContent>(new TargetingGroupComparator());
-//            for (TargetingGroup group : targetingGroups) {
-//                adMap.put(group, advertisementContentMap.get(group.getContentId()));
-//            }
-//            ;
-//            AdvertisementContent advertisement = new AdvertisementContent();
-//            for (Map.Entry<TargetingGroup, AdvertisementContent> entry : adMap.descendingMap().entrySet()) {
-//                TargetingEvaluator targetingEvaluator = new TargetingEvaluator(new RequestContext(customerId,marketplaceId));
-//                TargetingPredicateResult result = null;
-//                try {
-//                    result = targetingEvaluator.evaluate(entry.getKey());
-//                } catch (ExecutionException e) {
-//                    e.printStackTrace();
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                }
-//                if (!result.isTrue()) {
-//                    continue;
-//                }
-//                advertisement = adMap.get(entry.getKey());
-//                break;
-
-//            }
-
-
             TreeMap<Double, AdvertisementContent> advertisementContentTreeMap = new TreeMap<Double, AdvertisementContent>();
+
             if (CollectionUtils.isNotEmpty(contents)) {
                 List<AdvertisementContent> advertisementContents = contents.stream()
                         .filter(advertisementContent -> targetingGroupDao.get(advertisementContent.getContentId()).stream()
@@ -136,12 +101,10 @@ public class AdvertisementSelectionLogic {
                         }
                     advertisementContentTreeMap.put(ct, ad);
                 }
-
                 Double key = advertisementContentTreeMap.lastKey();
                 AdvertisementContent advertisementContent = advertisementContentTreeMap.get(key);
                 generatedAdvertisement = new GeneratedAdvertisement(advertisementContent);
             }
-
         }
         return generatedAdvertisement;
     }

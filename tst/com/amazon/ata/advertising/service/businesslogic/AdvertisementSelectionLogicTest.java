@@ -27,6 +27,7 @@ public class AdvertisementSelectionLogicTest {
 
     private static final String CONTENT_ID1 = UUID.randomUUID().toString();
     private static final AdvertisementContent CONTENT1 = AdvertisementContent.builder().withContentId(CONTENT_ID1).build();
+    private static final TargetingGroup GROUP1 = TargetingGroup.builder().withContentId(CONTENT_ID1).build();
     private static final String CONTENT_ID2 = UUID.randomUUID().toString();
     private static final AdvertisementContent CONTENT2 = AdvertisementContent.builder().withContentId(CONTENT_ID2).build();
     private static final String CONTENT_ID3 = UUID.randomUUID().toString();
@@ -80,6 +81,8 @@ public class AdvertisementSelectionLogicTest {
         List<AdvertisementContent> contents = Arrays.asList(CONTENT1);
         when(contentDao.get(MARKETPLACE_ID)).thenReturn(contents);
         when(random.nextInt(contents.size())).thenReturn(0);
+        List<TargetingGroup> groups = Arrays.asList(GROUP1);
+        when(targetingGroupDao.get(CONTENT_ID1)).thenReturn(groups);
         GeneratedAdvertisement ad = adSelectionService.selectAdvertisement(CUSTOMER_ID, MARKETPLACE_ID);
 
         assertEquals(CONTENT_ID1, ad.getContent().getContentId());
