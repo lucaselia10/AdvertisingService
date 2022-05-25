@@ -32,7 +32,8 @@ public class AdvertisementSelectionLogic {
 
     /**
      * Constructor for AdvertisementSelectionLogic.
-     * @param contentDao Source of advertising content.
+     *
+     * @param contentDao        Source of advertising content.
      * @param targetingGroupDao Source of targeting groups for each advertising content.
      */
     @Inject
@@ -44,6 +45,7 @@ public class AdvertisementSelectionLogic {
 
     /**
      * Setter for Random class.
+     *
      * @param random generates random number used to select advertisements.
      */
     public void setRandom(Random random) {
@@ -55,10 +57,10 @@ public class AdvertisementSelectionLogic {
      * eligible content with the highest click through rate.  If no advertisement is available or eligible, returns an
      * EmptyGeneratedAdvertisement.
      *
-     * @param customerId - the customer to generate a custom advertisement for
+     * @param customerId    - the customer to generate a custom advertisement for
      * @param marketplaceId - the id of the marketplace the advertisement will be rendered on
      * @return an advertisement customized for the customer id provided, or an empty advertisement if one could
-     *     not be generated.
+     * not be generated.
      */
     public GeneratedAdvertisement selectAdvertisement(String customerId, String marketplaceId) {
         GeneratedAdvertisement generatedAdvertisement = new EmptyGeneratedAdvertisement();
@@ -68,49 +70,46 @@ public class AdvertisementSelectionLogic {
             // Gets list of AdvertisementContent for the marketplaceId
             final List<AdvertisementContent> contents = contentDao.get(marketplaceId);
 
-//            TreeMap<TargetingGroup, String> adMap = new TreeMap<TargetingGroup, String>(new TargetingGroupComparator());
+//            Map<String, AdvertisementContent> advertisementContentMap = new HashMap<>();
 //            for (AdvertisementContent ad : contents) {
-//                // Gets list of TargetingGroup associated with the AdvertisementContent's contentId
-//                List<TargetingGroup> targetingGroups = targetingGroupDao.get(ad.getContentId());
-//                for (TargetingGroup group : targetingGroups) {
-//                    // Puts the TargetingGroup's into the Sorted TreeMap by their clickthrough rate
-//                    adMap.put(group, group.getContentId());
+//                advertisementContentMap.put(ad.getContentId(), ad);
+//            }
+//
+//            List<TargetingGroup> targetingGroups = new ArrayList<>();
+//            if (CollectionUtils.isNotEmpty(contents)) {
+//                for (AdvertisementContent content : contents) {
+//                    targetingGroups.addAll(targetingGroupDao.get(content.getContentId()));
 //                }
 //            }
 //
-//            for (Map.Entry<TargetingGroup, String> entry : adMap.entrySet()) {
-//                TargetingEvaluator targetingEvaluator = new TargetingEvaluator(new RequestContext(customerId, marketplaceId));
+//            TreeMap<TargetingGroup, AdvertisementContent> adMap = new TreeMap<TargetingGroup, AdvertisementContent>(new TargetingGroupComparator());
+//            for (TargetingGroup group : targetingGroups) {
+//                adMap.put(group, advertisementContentMap.get(group.getContentId()));
+//            }
+//            ;
+//            AdvertisementContent advertisement = new AdvertisementContent();
+//            for (Map.Entry<TargetingGroup, AdvertisementContent> entry : adMap.descendingMap().entrySet()) {
+//                TargetingEvaluator targetingEvaluator = new TargetingEvaluator(new RequestContext(customerId,marketplaceId));
 //                TargetingPredicateResult result = null;
 //                try {
-//                   result = targetingEvaluator.evaluate(entry.getKey());
+//                    result = targetingEvaluator.evaluate(entry.getKey());
 //                } catch (ExecutionException e) {
 //                    e.printStackTrace();
 //                } catch (InterruptedException e) {
 //                    e.printStackTrace();
 //                }
-//                if (result.isTrue()) {
-//
+//                if (!result.isTrue()) {
+//                    continue;
+//                }
+//                advertisement = adMap.get(entry.getKey());
+//                break;
+
 //            }
 
 
-
-//                    .anyMatch(targetingGroup -> {
-//                                TargetingEvaluator targetingEvaluator = new TargetingEvaluator(new RequestContext(customerId, marketplaceId));
-//                                TargetingPredicateResult result = null;
-//                                try {
-//                                    result = targetingEvaluator.evaluate(targetingGroup);
-//                                } catch (ExecutionException e) {
-//                                    e.printStackTrace();
-//                                } catch (InterruptedException e) {
-//                                    e.printStackTrace();
-//                                }
-//                                return result.isTrue();
-//                            })
-//                    .collect(Collectors.toList());
-
-
+            TreeMap<Double, AdvertisementContent> advertisementContentTreeMap = new TreeMap<Double, AdvertisementContent>();
             if (CollectionUtils.isNotEmpty(contents)) {
-                LisAdvertisementContent> advertisementContents = contents.stream()
+                List<AdvertisementContent> advertisementContents = contents.stream()
                         .filter(advertisementContent -> targetingGroupDao.get(advertisementContent.getContentId()).stream()
                                 .anyMatch(targetingGroup -> {
                                     TargetingEvaluator targetingEvaluator = new TargetingEvaluator(new RequestContext(customerId, marketplaceId));
@@ -126,10 +125,24 @@ public class AdvertisementSelectionLogic {
                                 }))
                         .collect(Collectors.toList());
 
-                AdvertisementContent randomAdvertisementContent = .get(0);
-                generatedAdvertisement = new GeneratedAdvertisement(randomAdvertisementContent);
+                for (AdvertisementContent ad : advertisementContents) {
+                    double ct = 0;
+                    List<TargetingGroup> targetingGroups = targetingGroupDao.get(ad.getContentId());
+                        for (TargetingGroup group : targetingGroups) {
+                            if (group.getClickThroughRate() > ct) {
+                                ct = group.getClickThroughRate();
+                            }
+
+                        }
+                    advertisementContentTreeMap.put(ct, ad);
+                }
+
+                Double key = advertisementContentTreeMap.lastKey();
+                AdvertisementContent advertisementContent = advertisementContentTreeMap.get(key);
+                generatedAdvertisement = new GeneratedAdvertisement(advertisementContent);
             }
 
+        }
         return generatedAdvertisement;
     }
 }
